@@ -13,6 +13,7 @@ export type Pledge = {
   phone: string
   amount: number
   event_id: string
+  payment_received: boolean
   created_at: string
   events?: Pick<Event, 'name'>
 }

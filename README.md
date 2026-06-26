@@ -33,6 +33,8 @@ In the [Supabase SQL Editor](https://supabase.com/dashboard), run the SQL in:
 
 This creates the `events` and `pledges` tables, row-level security policies, and sample events.
 
+Then run `supabase/migrations/002_pledge_payment_received.sql` to add payment tracking and admin update/delete permissions on pledges.
+
 ### 4. Create an admin user
 
 In Supabase: **Authentication → Users → Add user** (email + password).
