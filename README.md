@@ -66,6 +66,26 @@ npm run dev
 - Public pledge form: http://localhost:5173
 - Admin login: http://localhost:5173/admin/login
 
+### 6. Pledge confirmation emails (optional)
+
+Pledgers receive a confirmation email after submitting. This uses a **Supabase Edge Function** and [Resend](https://resend.com) (free tier: 100 emails/day).
+
+1. Create a [Resend](https://resend.com) account and API key
+2. Install the [Supabase CLI](https://supabase.com/docs/guides/cli) and log in
+3. Link your project: `supabase link --project-ref YOUR_PROJECT_REF`
+4. Set secrets:
+   ```bash
+   supabase secrets set RESEND_API_KEY=re_xxxx
+   supabase secrets set PLEDGE_CONFIRMATION_FROM="JUSBA <onboarding@resend.dev>"
+   ```
+   For production, verify your domain in Resend and use e.g. `JUSBA <donations@yourdomain.com>`.
+5. Deploy the function:
+   ```bash
+   supabase functions deploy send-pledge-confirmation
+   ```
+
+Pledges still save if email is not configured; the form will note when confirmation could not be sent.
+
 ## Deploy (GitHub Pages)
 
 Live site: https://suchitbhayani.github.io/jusba-donation/
@@ -93,4 +113,5 @@ src/
   pages/admin/Events.tsx    # manage dropdown events
   pages/admin/Pledges.tsx   # view & export pledges
 supabase/migrations/        # database schema
+supabase/functions/           # edge functions (confirmation email)
 ```

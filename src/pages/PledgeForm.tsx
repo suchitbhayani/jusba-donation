@@ -18,6 +18,7 @@ export function PledgeForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   useEffect(() => {
     async function loadEvents() {
@@ -45,12 +46,15 @@ export function PledgeForm() {
     setForm((prev) => ({ ...prev, [key]: value }))
     setError(null)
     setSuccess(false)
+    setEmailSent(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setSuccess(false)
+    setEmailSent(false)
+    setEmailSent(false)
 
     const amount = parseFloat(form.amount)
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.event_id) {
@@ -67,22 +71,31 @@ export function PledgeForm() {
     }
 
     setSubmitting(true)
-    const { error: insertError } = await supabase.from('pledges').insert({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      amount,
-      event_id: form.event_id,
-    })
+    const { data: pledge, error: insertError } = await supabase
+      .from('pledges')
+      .insert({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        amount,
+        event_id: form.event_id,
+      })
+      .select('id')
+      .single()
 
-    setSubmitting(false)
-
-    if (insertError) {
+    if (insertError || !pledge) {
+      setSubmitting(false)
       setError('Could not submit your pledge. Please try again.')
       return
     }
 
+    const { error: emailError } = await supabase.functions.invoke('send-pledge-confirmation', {
+      body: { pledge_id: pledge.id },
+    })
+
+    setSubmitting(false)
     setSuccess(true)
+    setEmailSent(!emailError)
     setForm({ ...initialForm, event_id: events.length === 1 ? events[0].id : '' })
   }
 
@@ -178,6 +191,9 @@ export function PledgeForm() {
           {success && (
             <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
               Thank you for your pledge! We have recorded your information.
+              {emailSent
+                ? ' A confirmation email has been sent to your inbox.'
+                : ' We could not send a confirmation email, but your pledge was saved.'}
             </p>
           )}
 
