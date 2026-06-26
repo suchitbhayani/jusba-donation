@@ -1,17 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { getAuthRedirectUrl } from '../../lib/authRedirect'
 
 export function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    setMessage(null)
     setLoading(true)
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -27,6 +31,31 @@ export function AdminLogin() {
     }
 
     setLoggedIn(true)
+  }
+
+  async function handleForgotPassword() {
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setError('Enter your email address first, then click forgot password.')
+      return
+    }
+
+    setError(null)
+    setMessage(null)
+    setResetting(true)
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+      redirectTo: getAuthRedirectUrl(),
+    })
+
+    setResetting(false)
+
+    if (resetError) {
+      setError('Could not send reset email. Try again later.')
+      return
+    }
+
+    setMessage('Password reset email sent. Check your inbox.')
   }
 
   if (loggedIn) {
@@ -62,8 +91,22 @@ export function AdminLogin() {
             />
           </label>
 
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={resetting}
+              className="text-sm text-slate-600 hover:text-slate-900 disabled:opacity-50"
+            >
+              {resetting ? 'Sending...' : 'Forgot password?'}
+            </button>
+          </div>
+
           {error && (
             <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          )}
+          {message && (
+            <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">{message}</p>
           )}
 
           <button

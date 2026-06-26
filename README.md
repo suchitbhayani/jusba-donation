@@ -35,11 +35,27 @@ This creates the `events` and `pledges` tables, row-level security policies, and
 
 Then run `supabase/migrations/002_pledge_payment_received.sql` to add payment tracking and admin update/delete permissions on pledges.
 
-### 4. Create an admin user
+### 4. Create admin users
 
-In Supabase: **Authentication → Users → Add user** (email + password).
+**Option A — Invite by email (recommended)**
+
+1. Supabase → **Authentication → Users → Invite user**
+2. Enter their email and send the invitation
+3. They click the link in the email and land on **Set your admin password**
+4. After saving, they can log in at `/admin/login`
+
+**Option B — Create with a password**
+
+Supabase → **Authentication → Users → Add user** (email + password).
 
 Only authenticated users can manage events and view pledges.
+
+**Supabase URL configuration** (required for invites and password reset):
+
+- Site URL: `https://suchitbhayani.github.io/jusba-donation/`
+- Redirect URLs:
+  - `https://suchitbhayani.github.io/jusba-donation/admin/set-password`
+  - `https://suchitbhayani.github.io/jusba-donation/**`
 
 ### 5. Run locally
 
@@ -63,8 +79,10 @@ Pushes to `main` deploy automatically via GitHub Actions.
    - `VITE_SUPABASE_ANON_KEY`
 2. In **Settings → Pages**, set **Source** to **GitHub Actions** (if not already).
 3. In Supabase **Authentication → URL configuration**, add:
-   - `https://suchitbhayani.github.io/jusba-donation/`
-   - `https://suchitbhayani.github.io/jusba-donation/**`
+   - Site URL: `https://suchitbhayani.github.io/jusba-donation/`
+   - Redirect URLs:
+     - `https://suchitbhayani.github.io/jusba-donation/admin/set-password`
+     - `https://suchitbhayani.github.io/jusba-donation/**`
 
 ## Project structure
 
