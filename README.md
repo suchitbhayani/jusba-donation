@@ -77,6 +77,7 @@ Pledgers receive a confirmation email after submitting. This uses a **Supabase E
    ```bash
    supabase secrets set RESEND_API_KEY=re_xxxx
    supabase secrets set PLEDGE_CONFIRMATION_FROM="JUSBA <onboarding@resend.dev>"
+   supabase secrets set PLEDGE_CONFIRMATION_CC="ritasac@gmail.com"
    ```
    For production, verify your domain in Resend and use e.g. `JUSBA <donations@yourdomain.com>`.
 5. Deploy the function:
@@ -85,6 +86,8 @@ Pledgers receive a confirmation email after submitting. This uses a **Supabase E
    ```
 
 Pledges still save if email is not configured; the form will note when confirmation could not be sent.
+
+Confirmation emails CC `ritasac@gmail.com` by default. Admin invite and password-reset emails are sent by Supabase Auth directly and cannot be CC'd from this app — configure custom SMTP in Supabase if you need that.
 
 ## Deploy (GitHub Pages)
 

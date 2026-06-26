@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PaymentInstructions } from '../components/PaymentInstructions'
 import { supabase } from '../lib/supabase'
 import type { Event, PledgeFormData } from '../types'
 
@@ -19,6 +20,7 @@ export function PledgeForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [submittedEventName, setSubmittedEventName] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadEvents() {
@@ -47,6 +49,7 @@ export function PledgeForm() {
     setError(null)
     setSuccess(false)
     setEmailSent(false)
+    setSubmittedEventName(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -54,7 +57,7 @@ export function PledgeForm() {
     setError(null)
     setSuccess(false)
     setEmailSent(false)
-    setEmailSent(false)
+    setSubmittedEventName(null)
 
     const amount = parseFloat(form.amount)
     if (!form.name.trim() || !form.email.trim() || !form.phone.trim() || !form.event_id) {
@@ -69,6 +72,8 @@ export function PledgeForm() {
       setError('Please enter a valid pledge amount greater than zero.')
       return
     }
+
+    const eventName = events.find((event) => event.id === form.event_id)?.name ?? null
 
     setSubmitting(true)
     const { data: pledge, error: insertError } = await supabase
@@ -96,8 +101,12 @@ export function PledgeForm() {
     setSubmitting(false)
     setSuccess(true)
     setEmailSent(!emailError)
+    setSubmittedEventName(eventName)
     setForm({ ...initialForm, event_id: events.length === 1 ? events[0].id : '' })
   }
+
+  const selectedEventName =
+    events.find((event) => event.id === form.event_id)?.name ?? undefined
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-50">
@@ -105,9 +114,11 @@ export function PledgeForm() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900">JUSBA Donation Pledge</h1>
           <p className="mt-2 text-slate-600">
-            Share your intended gift. No payment is collected on this form.
+            Share your intended gift, then pay by Zelle using the instructions below.
           </p>
         </div>
+
+        <PaymentInstructions eventName={selectedEventName} className="mb-6" />
 
         <form
           onSubmit={handleSubmit}
@@ -189,12 +200,15 @@ export function PledgeForm() {
             <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
           )}
           {success && (
-            <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-              Thank you for your pledge! We have recorded your information.
-              {emailSent
-                ? ' A confirmation email has been sent to your inbox.'
-                : ' We could not send a confirmation email, but your pledge was saved.'}
-            </p>
+            <div className="mt-4 space-y-4">
+              <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+                Thank you for your pledge! We have recorded your information.
+                {emailSent
+                  ? ' A confirmation email with payment instructions has been sent to your inbox.'
+                  : ' We could not send a confirmation email, but your pledge was saved.'}
+              </p>
+              <PaymentInstructions eventName={submittedEventName ?? undefined} />
+            </div>
           )}
 
           <button

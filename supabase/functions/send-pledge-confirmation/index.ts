@@ -5,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const ZELLE_EMAIL = 'finance@jusba.org'
+const PLEDGE_EMAIL_CC = Deno.env.get('PLEDGE_CONFIRMATION_CC') ?? 'ritasac@gmail.com'
+
 type PledgeRow = {
   name: string
   email: string
@@ -27,7 +30,8 @@ function buildEmailHtml(pledge: PledgeRow) {
       <p>Hi ${pledge.name},</p>
       <p>
         We have received your donation pledge for <strong>${eventName}</strong>.
-        No payment has been collected through this form.
+        This form does not collect payment — please send your donation separately using the
+        instructions below.
       </p>
       <table style="margin: 20px 0; border-collapse: collapse; width: 100%;">
         <tr>
@@ -43,6 +47,19 @@ function buildEmailHtml(pledge: PledgeRow) {
           <td style="padding: 8px 0; text-align: right;">${pledge.phone}</td>
         </tr>
       </table>
+      <div style="margin: 24px 0; padding: 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;">
+        <h2 style="font-size: 16px; margin: 0 0 12px;">How to pay</h2>
+        <ol style="margin: 0; padding-left: 20px;">
+          <li style="margin-bottom: 8px;">Open your bank's Zelle app or website.</li>
+          <li style="margin-bottom: 8px;">
+            Send <strong>${amount}</strong> to <strong>${ZELLE_EMAIL}</strong>.
+          </li>
+          <li>
+            In the Zelle memo/note, mention the event you are donating for:
+            <strong>${eventName}</strong>.
+          </li>
+        </ol>
+      </div>
       <p>We appreciate your support of JUSBA.</p>
       <p style="color: #64748b; font-size: 13px; margin-top: 24px;">
         This email confirms we recorded your pledge. If you did not submit this, you can ignore this message.
@@ -105,6 +122,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from,
         to: pledge.email,
+        cc: [PLEDGE_EMAIL_CC],
         subject: `JUSBA pledge confirmation — ${eventName}`,
         html: buildEmailHtml(pledge as PledgeRow),
       }),
