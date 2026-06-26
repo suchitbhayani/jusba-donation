@@ -87,7 +87,7 @@ Pledgers receive a confirmation email after submitting. This uses a **Supabase E
 
 Pledges still save if email is not configured; the form will note when confirmation could not be sent.
 
-Confirmation emails CC `ritasac@gmail.com` by default. Admin invite and password-reset emails are sent by Supabase Auth directly and cannot be CC'd from this app — configure custom SMTP in Supabase if you need that.
+Confirmation emails CC `ritasac@gmail.com`. Admin invite and password-reset emails are separate (sent by Supabase Auth) and are not CC'd.
 
 ## Deploy (GitHub Pages)
 
