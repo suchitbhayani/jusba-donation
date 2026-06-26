@@ -70,19 +70,24 @@ npm run dev
 
 Pledgers receive a confirmation email after submitting. This uses a **Supabase Edge Function** and [Resend](https://resend.com) (free tier: 100 emails/day).
 
+The Supabase CLI is included as a dev dependency — run `npm install` first, then use `npx supabase` for all commands below (no global install or Docker required).
+
 1. Create a [Resend](https://resend.com) account and API key
-2. Install the [Supabase CLI](https://supabase.com/docs/guides/cli) and log in
-3. Link your project: `supabase link --project-ref YOUR_PROJECT_REF`
-4. Set secrets:
+2. Log in and link your project (find the ref in Supabase → **Project Settings → General → Reference ID**):
    ```bash
-   supabase secrets set RESEND_API_KEY=re_xxxx
-   supabase secrets set PLEDGE_CONFIRMATION_FROM="JUSBA <onboarding@resend.dev>"
-   supabase secrets set PLEDGE_CONFIRMATION_CC="ritasac@gmail.com"
+   npx supabase login
+   npx supabase link --project-ref YOUR_PROJECT_REF
+   ```
+3. Set secrets:
+   ```bash
+   npx supabase secrets set RESEND_API_KEY=re_xxxx
+   npx supabase secrets set PLEDGE_CONFIRMATION_FROM="JUSBA <onboarding@resend.dev>"
+   npx supabase secrets set PLEDGE_CONFIRMATION_CC="ritasac@gmail.com"
    ```
    For production, verify your domain in Resend and use e.g. `JUSBA <donations@yourdomain.com>`.
-5. Deploy the function:
+4. Deploy the function:
    ```bash
-   supabase functions deploy send-pledge-confirmation
+   npx supabase functions deploy send-pledge-confirmation
    ```
 
 Pledges still save if email is not configured; the form will note when confirmation could not be sent.
