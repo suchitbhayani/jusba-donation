@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 const ZELLE_EMAIL = 'finance@jusba.org'
-const PLEDGE_EMAIL_CC = Deno.env.get('PLEDGE_CONFIRMATION_CC') ?? 'ritasac@gmail.com'
 
 type PledgeRow = {
   name: string
@@ -14,6 +13,22 @@ type PledgeRow = {
   phone: string
   amount: number
   events: { name: string } | null
+}
+
+function cleanSecret(value: string | undefined) {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1)
+  }
+  return trimmed
+}
+
+function isTestResendSender(from: string) {
+  return from.includes('@resend.dev')
 }
 
 function formatAmount(amount: number) {
@@ -83,7 +98,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    const resendApiKey = cleanSecret(Deno.env.get('RESEND_API_KEY'))
     if (!resendApiKey) {
       return new Response(JSON.stringify({ error: 'Email service is not configured' }), {
         status: 500,
@@ -110,8 +125,28 @@ Deno.serve(async (req) => {
     }
 
     const from =
-      Deno.env.get('PLEDGE_CONFIRMATION_FROM') ?? 'JUSBA Donations <onboarding@resend.dev>'
+      cleanSecret(Deno.env.get('PLEDGE_CONFIRMATION_FROM')) ??
+      'JUSBA Donations <onboarding@resend.dev>'
+    const cc = cleanSecret(Deno.env.get('PLEDGE_CONFIRMATION_CC'))
     const eventName = pledge.events?.name ?? 'your selected event'
+
+    const emailPayload: {
+      from: string
+      to: string
+      subject: string
+      html: string
+      cc?: string[]
+    } = {
+      from,
+      to: pledge.email,
+      subject: `JUSBA pledge confirmation — ${eventName}`,
+      html: buildEmailHtml(pledge as PledgeRow),
+    }
+
+    // Resend test sender only allows delivery to your account email — CC breaks that.
+    if (cc && !isTestResendSender(from)) {
+      emailPayload.cc = [cc]
+    }
 
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -119,13 +154,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from,
-        to: pledge.email,
-        cc: [PLEDGE_EMAIL_CC],
-        subject: `JUSBA pledge confirmation — ${eventName}`,
-        html: buildEmailHtml(pledge as PledgeRow),
-      }),
+      body: JSON.stringify(emailPayload),
     })
 
     if (!resendResponse.ok) {

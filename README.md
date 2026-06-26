@@ -92,7 +92,9 @@ The Supabase CLI is included as a dev dependency — run `npm install` first, th
 
 Pledges still save if email is not configured; the form will note when confirmation could not be sent.
 
-Confirmation emails CC `ritasac@gmail.com`. Admin invite and password-reset emails are separate (sent by Supabase Auth) and are not CC'd.
+Confirmation emails CC `ritasac@gmail.com` once you use a verified domain as the sender. While testing with `onboarding@resend.dev`, CC is skipped because Resend only allows your account email in test mode.
+
+Admin invite and password-reset emails are separate (sent by Supabase Auth) and are not CC'd.
 
 ## Deploy (GitHub Pages)
 
