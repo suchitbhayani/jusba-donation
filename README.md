@@ -48,13 +48,21 @@ npm run dev
 - Public pledge form: http://localhost:5173
 - Admin login: http://localhost:5173/admin/login
 
-## Deploy
+## Deploy (GitHub Pages)
 
-Build with `npm run build`. Deploy the `dist/` folder to Vercel, Netlify, or GitHub Pages.
+Live site: https://suchitbhayani.github.io/jusba-donation/
 
-Set the same `VITE_SUPABASE_*` environment variables in your hosting provider.
+Pushes to `main` deploy automatically via GitHub Actions.
 
-In Supabase **Authentication → URL configuration**, add your production URL to allowed redirect URLs.
+### One-time setup
+
+1. In GitHub repo **Settings → Secrets and variables → Actions**, add:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+2. In **Settings → Pages**, set **Source** to **GitHub Actions** (if not already).
+3. In Supabase **Authentication → URL configuration**, add:
+   - `https://suchitbhayani.github.io/jusba-donation/`
+   - `https://suchitbhayani.github.io/jusba-donation/**`
 
 ## Project structure
 

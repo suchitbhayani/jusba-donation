@@ -8,7 +8,7 @@ import { AdminPledges } from './pages/admin/Pledges'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<PledgeForm />} />
         <Route path="/admin/login" element={<AdminLogin />} />
